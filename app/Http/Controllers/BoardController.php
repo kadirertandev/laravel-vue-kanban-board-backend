@@ -2,48 +2,69 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Board;
+use App\Http\Resources\BoardResource;
 use Illuminate\Http\Request;
 
 class BoardController extends Controller
 {
-  /**
-   * Display a listing of the resource.
-   */
-  public function index()
+  public function index(Request $request)
   {
-    //
+    $boards = $request->user()->boards()->latest()->get();
+
+    return BoardResource::collection($boards);
   }
 
-  /**
-   * Store a newly created resource in storage.
-   */
   public function store(Request $request)
   {
-    //
+    $validated = $request->validate([
+      "title" => ["required", "string", "max:100"],
+      "description" => ["required", "string", "max:255"]
+    ]);
+
+    $request->user()->boards()->create([
+      "title" => $validated["title"],
+      "description" => $validated["description"]
+    ]);
+
+    return response()->json([
+      "status" => "success",
+      "message" => "Board created successfully!"
+    ], 201);
   }
 
-  /**
-   * Display the specified resource.
-   */
-  public function show(Board $board)
+  public function show(Request $request, $id)
   {
-    //
+    $board = $request->user()->boards()->findOrFail($id);
+
+    return new BoardResource($board);
   }
 
-  /**
-   * Update the specified resource in storage.
-   */
-  public function update(Request $request, Board $board)
+  public function update(Request $request, $id)
   {
-    //
+    $board = $request->user()->boards()->findOrFail($id);
+
+    $validated = $request->validate([
+      "title" => ["required", "string", "max:100"],
+      "description" => ["required", "string", "max:255"]
+    ]);
+
+    $board->update([
+      "title" => $validated["title"],
+      "description" => $validated["description"]
+    ]);
+
+    return new BoardResource($board);
   }
 
-  /**
-   * Remove the specified resource from storage.
-   */
-  public function destroy(Board $board)
+  public function destroy(Request $request, $id)
   {
-    //
+    $board = $request->user()->boards()->findOrFail($id);
+
+    $board->delete();
+
+    return response()->json([
+      "status" => "success",
+      "message" => "Board deleted successfully",
+    ], 204);
   }
 }
