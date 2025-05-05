@@ -22,6 +22,6 @@ class Board extends Model
 
   public function columns()
   {
-    return $this->hasMany(Column::class)->orderBy("position");
+    return $this->hasMany(Column::class)->orderBy("position", "desc");
   }
 }

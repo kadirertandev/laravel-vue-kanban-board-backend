@@ -2,48 +2,65 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Column;
+use App\Http\Resources\ColumnResource;
 use Illuminate\Http\Request;
 
 class ColumnController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+  public function index(Request $request, $boardId)
+  {
+    $columns = $request->user()->boards()->findOrFail($boardId)->columns()->get();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+    return ColumnResource::collection($columns);
+  }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Column $column)
-    {
-        //
-    }
+  public function store(Request $request, $boardId)
+  {
+    $validated = $request->validate([
+      "title" => ["required", "string", "max:100"]
+    ]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Column $column)
-    {
-        //
-    }
+    $request->user()->boards()->findOrFail($boardId)->columns()->create([
+      "title" => $validated["title"]
+    ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Column $column)
-    {
-        //
-    }
+    return response()->json([
+      "status" => "success",
+      "message" => "Column created successfully!"
+    ], 201);
+  }
+
+  public function show(Request $request, $boardId, $columnId)
+  {
+    $column = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId);
+
+    return new ColumnResource($column);
+  }
+
+  public function update(Request $request, $boardId, $columnId)
+  {
+    $column = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId);
+
+    $validated = $request->validate([
+      "title" => ["required", "string", "max:100"]
+    ]);
+
+    $column->update([
+      "title" => $validated["title"],
+    ]);
+
+    return new ColumnResource($column);
+  }
+
+  public function destroy(Request $request, $boardId, $columnId)
+  {
+    $column = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId);
+
+    $column->delete();
+
+    return response()->json([
+      "status" => "success",
+      "message" => "Column deleted successfully",
+    ], 204);
+  }
 }
