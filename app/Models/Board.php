@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 class Board extends Model
 {
@@ -23,5 +24,14 @@ class Board extends Model
   public function columns()
   {
     return $this->hasMany(Column::class)->orderBy("position", "desc");
+  }
+
+  public function scopeWithConditionals($query, Request $request)
+  {
+    $query->when($request->boolean("withColumns"), function ($query) use ($request) {
+      $query->with([
+        "columns" => fn($q) => $q->withConditionals($request)
+      ]);
+    });
   }
 }

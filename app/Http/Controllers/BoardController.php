@@ -9,7 +9,7 @@ class BoardController extends Controller
 {
   public function index(Request $request)
   {
-    $boards = $request->user()->boards()->with("columns")->latest()->get();
+    $boards = $request->user()->boards()->latest()->withConditionals($request)->get();
 
     return BoardResource::collection($boards);
   }
@@ -34,7 +34,7 @@ class BoardController extends Controller
 
   public function show(Request $request, $id)
   {
-    $board = $request->user()->boards()->with("columns")->findOrFail($id);
+    $board = $request->user()->boards()->withConditionals($request)->findOrFail($id);
 
     return new BoardResource($board);
   }

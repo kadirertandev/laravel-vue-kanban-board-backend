@@ -14,15 +14,20 @@ class TaskResource extends JsonResource
    */
   public function toArray(Request $request): array
   {
-    return [
+    $data = [
       "id" => $this->id,
       "title" => $this->title,
       "description" => $this->description,
       "position" => $this->position,
       "createdAt" => $this->created_at->diffForHumans(),
-      "relations" => [
-        "column_id" => $this->column->id
-      ]
     ];
+
+    if ($this->relationLoaded('column')) {
+      $data['relations'] = [
+        'column_id' => $this->column->id,
+      ];
+    }
+
+    return $data;
   }
 }

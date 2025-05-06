@@ -14,15 +14,20 @@ class ColumnResource extends JsonResource
    */
   public function toArray(Request $request): array
   {
-    return [
+    $data = [
       "id" => $this->id,
       "title" => $this->title,
       "position" => $this->position,
       "createdAt" => $this->created_at->diffForHumans(),
-      "tasks" => TaskResource::collection($this->tasks),
-      "relations" => [
-        "board_id" => $this->board->id
-      ]
+      "tasks" => TaskResource::collection($this->whenLoaded("tasks")),
     ];
+
+    if ($this->relationLoaded('board')) {
+      $data['relations'] = [
+        'board_id' => $this->board->id,
+      ];
+    }
+
+    return $data;
   }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class Column extends Model
@@ -51,5 +52,18 @@ class Column extends Model
   public function tasks()
   {
     return $this->hasMany(Task::class)->orderBy("position", "desc");
+  }
+
+  public function scopeWithConditionals($query, Request $request)
+  {
+    $query
+      ->when($request->boolean("withColumnTasks"), function ($query) {
+        $query->with([
+          "tasks" => fn($q) => $q->with("column")
+        ]);
+      })
+      ->when($request->boolean("withColumnBoard"), function ($query) {
+        $query->with(["board"]);
+      });
   }
 }
