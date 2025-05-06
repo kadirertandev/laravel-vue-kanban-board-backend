@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\ColumnController;
+use App\Http\Controllers\TaskController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,4 +16,6 @@ Route::group([
   Route::apiResource("boards", BoardController::class);
 
   Route::apiResource("boards.columns", ColumnController::class);
+
+  Route::apiResource("boards.columns.tasks", TaskController::class);
 });

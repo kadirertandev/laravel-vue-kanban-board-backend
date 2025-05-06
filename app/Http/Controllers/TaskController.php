@@ -2,48 +2,69 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Task;
+use App\Http\Resources\TaskResource;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+  public function index(Request $request, $boardId, $columnId)
+  {
+    $tasks = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId)->tasks()->get();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+    return TaskResource::collection($tasks);
+  }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Task $task)
-    {
-        //
-    }
+  public function store(Request $request, $boardId, $columnId)
+  {
+    $validated = $request->validate([
+      "title" => ["required", "string", "max:100"],
+      "description" => ["required", "string", "max:255"]
+    ]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Task $task)
-    {
-        //
-    }
+    $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId)->tasks()->create([
+      "title" => $validated["title"],
+      "description" => $validated["description"]
+    ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Task $task)
-    {
-        //
-    }
+    return response()->json([
+      "status" => "success",
+      "message" => "Task created successfully!"
+    ], 201);
+  }
+
+  public function show(Request $request, $boardId, $columnId, $taskId)
+  {
+    $task = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId)->tasks()->findOrFail($taskId);
+
+    return new TaskResource($task);
+  }
+
+  public function update(Request $request, $boardId, $columnId, $taskId)
+  {
+    $task = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId)->tasks()->findOrFail($taskId);
+
+    $validated = $request->validate([
+      "title" => ["required", "string", "max:100"],
+      "description" => ["required", "string", "max:255"]
+    ]);
+
+    $task->update([
+      "title" => $validated["title"],
+      "description" => $validated["description"]
+    ]);
+
+    return new TaskResource($task);
+  }
+
+  public function destroy(Request $request, $boardId, $columnId, $taskId)
+  {
+    $task = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId)->tasks()->findOrFail($taskId);
+
+    $task->delete();
+
+    return response()->json([
+      "status" => "success",
+      "message" => "Task deleted successfully",
+    ], 204);
+  }
 }
