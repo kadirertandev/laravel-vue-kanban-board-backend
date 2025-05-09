@@ -17,12 +17,10 @@ class TaskController extends Controller
   public function store(Request $request, $boardId, $columnId)
   {
     $validated = $request->validate([
-      "title" => ["required", "string", "max:100"],
-      "description" => ["required", "string", "max:255"]
+      "description" => ["required", "string", "max:255"],
     ]);
 
     $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId)->tasks()->create([
-      "title" => $validated["title"],
       "description" => $validated["description"]
     ]);
 
@@ -44,12 +42,10 @@ class TaskController extends Controller
     $task = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId)->tasks()->findOrFail($taskId);
 
     $validated = $request->validate([
-      "title" => ["required", "string", "max:100"],
       "description" => ["required", "string", "max:255"]
     ]);
 
     $task->update([
-      "title" => $validated["title"],
       "description" => $validated["description"]
     ]);
 

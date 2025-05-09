@@ -17,6 +17,7 @@ class ColumnResource extends JsonResource
     $data = [
       "id" => $this->id,
       "title" => $this->title,
+      "description" => $this->description,
       "position" => $this->position,
       "createdAt" => $this->created_at->diffForHumans(),
       "tasks" => TaskResource::collection($this->whenLoaded("tasks")),

@@ -15,7 +15,6 @@ class Task extends Model
 
   protected $fillable = [
     "column_id",
-    "title",
     "description",
     "position"
   ];

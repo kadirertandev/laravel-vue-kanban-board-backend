@@ -17,6 +17,7 @@ class Column extends Model
   protected $fillable = [
     "board_id",
     "title",
+    "description",
     "position"
   ];
 

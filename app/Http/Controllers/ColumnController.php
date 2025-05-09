@@ -17,11 +17,13 @@ class ColumnController extends Controller
   public function store(Request $request, $boardId)
   {
     $validated = $request->validate([
-      "title" => ["required", "string", "max:100"]
+      "title" => ["required", "string", "max:100"],
+      "description" => ["required", "string", "max:255"]
     ]);
 
     $request->user()->boards()->findOrFail($boardId)->columns()->create([
-      "title" => $validated["title"]
+      "title" => $validated["title"],
+      "description" => $validated["description"]
     ]);
 
     return response()->json([
@@ -42,11 +44,13 @@ class ColumnController extends Controller
     $column = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId);
 
     $validated = $request->validate([
-      "title" => ["required", "string", "max:100"]
+      "title" => ["required", "string", "max:100"],
+      "description" => ["required", "string", "max:255"]
     ]);
 
     $column->update([
       "title" => $validated["title"],
+      "description" => $validated["description"]
     ]);
 
     return new ColumnResource($column);

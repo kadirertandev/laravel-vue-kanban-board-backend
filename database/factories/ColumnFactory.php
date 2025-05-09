@@ -22,6 +22,7 @@ class ColumnFactory extends Factory
     return [
       "board_id" => Board::factory(),
       "title" => fake()->title,
+      "description" => fake()->text(100),
       "position" => $position++
     ];
   }

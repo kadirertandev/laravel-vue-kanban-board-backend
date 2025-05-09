@@ -21,7 +21,6 @@ class TaskFactory extends Factory
 
     return [
       "column_id" => Column::factory(),
-      "title" => fake()->title,
       "description" => fake()->text(100),
       "position" => $position++
     ];
