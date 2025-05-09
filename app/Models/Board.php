@@ -23,7 +23,7 @@ class Board extends Model
 
   public function columns()
   {
-    return $this->hasMany(Column::class)->orderBy("position", "desc");
+    return $this->hasMany(Column::class)->orderBy("position", "asc");
   }
 
   public function scopeWithConditionals($query, Request $request)

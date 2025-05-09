@@ -52,7 +52,7 @@ class Column extends Model
 
   public function tasks()
   {
-    return $this->hasMany(Task::class)->orderBy("position", "desc");
+    return $this->hasMany(Task::class)->orderBy("position", "asc");
   }
 
   public function scopeWithConditionals($query, Request $request)
