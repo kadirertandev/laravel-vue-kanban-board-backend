@@ -31,4 +31,6 @@ class ColumnResource extends JsonResource
 
     return $data;
   }
+
+  public $preserveKeys = true;
 }
