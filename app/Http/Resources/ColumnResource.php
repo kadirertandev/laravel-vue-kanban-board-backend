@@ -20,7 +20,11 @@ class ColumnResource extends JsonResource
       "description" => $this->description,
       "position" => $this->position,
       "createdAt" => $this->created_at->diffForHumans(),
-      "tasks" => TaskResource::collection($this->whenLoaded("tasks")),
+      "tasks" => TaskResource::collection($this->whenLoaded("tasks", function () {
+        return $this->tasks
+          ->keyBy('id')
+          ->map(fn($task) => new TaskResource($task));
+      })),
     ];
 
     if ($this->relationLoaded('board')) {

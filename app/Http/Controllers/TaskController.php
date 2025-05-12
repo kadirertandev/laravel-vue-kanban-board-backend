@@ -11,7 +11,7 @@ class TaskController extends Controller
   {
     $tasks = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId)->tasks()->get();
 
-    return TaskResource::collection($tasks);
+    return TaskResource::collection($tasks->keyBy->id);
   }
 
   public function store(Request $request, $boardId, $columnId)

@@ -9,9 +9,9 @@ class ColumnController extends Controller
 {
   public function index(Request $request, $boardId)
   {
-    $columns = $request->user()->boards()->findOrFail($boardId)->columns()->get();
+    $columns = $request->user()->boards()->findOrFail($boardId)->columns()->withConditionals($request)->get();
 
-    return ColumnResource::collection($columns);
+    return ColumnResource::collection($columns->keyBy->id);
   }
 
   public function store(Request $request, $boardId)
@@ -34,7 +34,7 @@ class ColumnController extends Controller
 
   public function show(Request $request, $boardId, $columnId)
   {
-    $column = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId);
+    $column = $request->user()->boards()->findOrFail($boardId)->columns()->withConditionals($request)->findOrFail($columnId);
 
     return new ColumnResource($column);
   }
