@@ -11,7 +11,7 @@ class ColumnController extends Controller
   {
     $columns = $request->user()->boards()->findOrFail($boardId)->columns()->withConditionals($request)->get();
 
-    return ColumnResource::collection($columns->keyBy->id);
+    return ColumnResource::collection($columns);
   }
 
   public function store(Request $request, $boardId)
@@ -66,5 +66,20 @@ class ColumnController extends Controller
       "status" => "success",
       "message" => "Column deleted successfully",
     ], 204);
+  }
+
+  public function move(Request $request, $boardId, $columnId)
+  {
+    $request->validate([
+      'position' => ['required', 'numeric']
+    ]);
+
+    $column = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId);
+
+    $column->update([
+      'position' => round(request('position'), 5)
+    ]);
+
+    return new ColumnResource($column);
   }
 }

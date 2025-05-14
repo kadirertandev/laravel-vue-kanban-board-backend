@@ -19,11 +19,7 @@ class BoardResource extends JsonResource
       "title" => $this->title,
       "description" => $this->description,
       "createdAt" => $this->created_at->diffForHumans(),
-      "columns" => ColumnResource::collection($this->whenLoaded("columns", function () {
-        return $this->columns
-          ->keyBy('id')
-          ->map(fn($column) => new ColumnResource($column));
-      }))
+      "columns" => ColumnResource::collection($this->whenLoaded("columns"))
     ];
   }
 }
