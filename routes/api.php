@@ -19,4 +19,5 @@ Route::group([
   Route::put("/boards/{board}/columns/{column}/move", [ColumnController::class, "move"])->name("boards.columns.move");
 
   Route::apiResource("boards.columns.tasks", TaskController::class);
+  Route::put("/boards/{board}/columns/{column}/tasks/{task}/move", [TaskController::class, "move"])->name("boards.columns.tasks.move");
 });

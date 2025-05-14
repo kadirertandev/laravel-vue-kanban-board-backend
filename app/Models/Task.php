@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class Task extends Model
 {
@@ -46,5 +47,13 @@ class Task extends Model
   public function column()
   {
     return $this->belongsTo(Column::class);
+  }
+
+  public function scopeWithConditionals($query, Request $request)
+  {
+    $query
+      ->when($request->boolean("withTaskColumn"), function ($query) {
+        $query->with(["column"]);
+      });
   }
 }

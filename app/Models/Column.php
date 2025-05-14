@@ -58,9 +58,9 @@ class Column extends Model
   public function scopeWithConditionals($query, Request $request)
   {
     $query
-      ->when($request->boolean("withColumnTasks"), function ($query) {
+      ->when($request->boolean("withColumnTasks"), function ($query) use ($request) {
         $query->with([
-          "tasks" => fn($q) => $q->with("column")
+          "tasks" => fn($q) => $q->withConditionals($request)
         ]);
       })
       ->when($request->boolean("withColumnBoard"), function ($query) {

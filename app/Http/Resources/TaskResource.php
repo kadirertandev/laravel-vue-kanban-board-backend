@@ -29,6 +29,4 @@ class TaskResource extends JsonResource
 
     return $data;
   }
-
-  public $preserveKeys = true;
 }
