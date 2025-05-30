@@ -8,12 +8,6 @@
 composer install
 ```
 
-### Generate application key
-
-```sh
-php artisan key:generate
-```
-
 ### Copy environment file
 
 ```sh
@@ -21,6 +15,12 @@ cp .env.example .env
 ```
 
 **Change the database name using .env file**
+
+### Generate application key
+
+```sh
+php artisan key:generate
+```
 
 ### Seed the database
 
