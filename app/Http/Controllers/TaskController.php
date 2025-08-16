@@ -20,13 +20,14 @@ class TaskController extends Controller
       "description" => ["required", "string", "max:255"],
     ]);
 
-    $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId)->tasks()->create([
+    $task = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId)->tasks()->create([
       "description" => $validated["description"]
     ]);
 
     return response()->json([
       "status" => "success",
-      "message" => "Task created successfully!"
+      "message" => "Task created successfully!",
+      "data" => new TaskResource($task->load("column"))
     ], 201);
   }
 

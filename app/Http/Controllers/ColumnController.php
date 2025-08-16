@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ColumnResource;
+use App\Models\Column;
 use Illuminate\Http\Request;
 
 class ColumnController extends Controller
@@ -21,14 +22,15 @@ class ColumnController extends Controller
       "description" => ["required", "string", "max:255"]
     ]);
 
-    $request->user()->boards()->findOrFail($boardId)->columns()->create([
+    $column = $request->user()->boards()->findOrFail($boardId)->columns()->create([
       "title" => $validated["title"],
       "description" => $validated["description"]
     ]);
 
     return response()->json([
       "status" => "success",
-      "message" => "Column created successfully!"
+      "message" => "Column created successfully!",
+      "data" => new ColumnResource($column->load(["board", "tasks", "tasks.column"]))
     ], 201);
   }
 

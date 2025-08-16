@@ -21,14 +21,15 @@ class BoardController extends Controller
       "description" => ["required", "string", "max:255"]
     ]);
 
-    $request->user()->boards()->create([
+    $board = $request->user()->boards()->create([
       "title" => $validated["title"],
       "description" => $validated["description"]
     ]);
 
     return response()->json([
       "status" => "success",
-      "message" => "Board created successfully!"
+      "message" => "Board created successfully!",
+      "data" => new BoardResource($board)
     ], 201);
   }
 

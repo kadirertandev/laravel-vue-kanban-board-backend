@@ -18,7 +18,8 @@ class BoardResource extends JsonResource
       "id" => $this->id,
       "title" => $this->title,
       "description" => $this->description,
-      "createdAt" => $this->created_at->diffForHumans(),
+      "createdAtFrontend" => $this->created_at->diffForHumans(),
+      "createdAt" => $this->created_at,
       "columns" => ColumnResource::collection($this->whenLoaded("columns"))
     ];
   }
