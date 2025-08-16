@@ -3,24 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\TaskResource;
+use App\Models\Column;
+use App\Models\Task;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
-  public function index(Request $request, $boardId, $columnId)
+  use AuthorizesRequests;
+
+  public function index(Request $request, Column $column)
   {
-    $tasks = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId)->tasks()->withConditionals($request)->get();
+    $this->authorize("viewAny", [Task::class, $column]);
+
+    $tasks = $column->tasks()->withConditionals($request)->get();
 
     return TaskResource::collection($tasks);
   }
 
-  public function store(Request $request, $boardId, $columnId)
+  public function store(Request $request, Column $column)
   {
+    $this->authorize("create", [Task::class, $column]);
+
     $validated = $request->validate([
       "description" => ["required", "string", "max:255"],
     ]);
 
-    $task = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId)->tasks()->create([
+    $task = $column->tasks()->create([
       "description" => $validated["description"]
     ]);
 
@@ -31,16 +40,16 @@ class TaskController extends Controller
     ], 201);
   }
 
-  public function show(Request $request, $boardId, $columnId, $taskId)
+  public function show(Request $request, Task $task)
   {
-    $task = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId)->tasks()->findOrFail($taskId);
+    $this->authorize("view", $task);
 
     return new TaskResource($task);
   }
 
-  public function update(Request $request, $boardId, $columnId, $taskId)
+  public function update(Request $request, Task $task)
   {
-    $task = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId)->tasks()->findOrFail($taskId);
+    $this->authorize("update", $task);
 
     $validated = $request->validate([
       "description" => ["required", "string", "max:255"]
@@ -53,9 +62,9 @@ class TaskController extends Controller
     return new TaskResource($task);
   }
 
-  public function destroy(Request $request, $boardId, $columnId, $taskId)
+  public function destroy(Request $request, Task $task)
   {
-    $task = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId)->tasks()->findOrFail($taskId);
+    $this->authorize("update", $task);
 
     $task->delete();
 
@@ -65,21 +74,21 @@ class TaskController extends Controller
     ], 204);
   }
 
-  public function move(Request $request, $boardId, $columnId, $taskId)
+  public function move(Request $request, Task $task)
   {
+    $this->authorize("update", $task);
+
     $request->validate([
       'fromColumn' => ['required', 'exists:columns,id'],
       'toColumn' => ['required', 'exists:columns,id'],
       'position' => ['required', 'numeric'],
     ]);
 
-    $task = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail(request("fromColumn"))->tasks()->findOrFail($taskId);
-
     $task->update([
       'column_id' => request("toColumn"),
       'position' => round(request('position'), 5)
     ]);
 
-    return new TaskResource($task);
+    return new TaskResource($task->load("column"));
   }
 }

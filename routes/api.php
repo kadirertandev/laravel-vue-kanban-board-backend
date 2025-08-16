@@ -15,9 +15,9 @@ Route::group([
 
   Route::apiResource("boards", BoardController::class);
 
-  Route::apiResource("boards.columns", ColumnController::class);
-  Route::put("/boards/{board}/columns/{column}/move", [ColumnController::class, "move"])->name("boards.columns.move");
+  Route::apiResource("boards.columns", ColumnController::class)->shallow();
+  Route::put("columns/{column}/move", [ColumnController::class, "move"])->name("boards.columns.move");
 
-  Route::apiResource("boards.columns.tasks", TaskController::class);
-  Route::put("/boards/{board}/columns/{column}/tasks/{task}/move", [TaskController::class, "move"])->name("boards.columns.tasks.move");
+  Route::apiResource("columns.tasks", TaskController::class)->shallow();
+  Route::put("tasks/{task}/move", [TaskController::class, "move"])->name("boards.columns.tasks.move");
 });

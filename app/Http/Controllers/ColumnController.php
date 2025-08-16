@@ -3,26 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ColumnResource;
+use App\Models\Board;
 use App\Models\Column;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
 class ColumnController extends Controller
 {
-  public function index(Request $request, $boardId)
+  use AuthorizesRequests;
+
+  public function index(Request $request, Board $board)
   {
-    $columns = $request->user()->boards()->findOrFail($boardId)->columns()->withConditionals($request)->get();
+    $this->authorize("viewAny", [Column::class, $board]);
+
+    $columns = $board->columns()->withConditionals($request)->get();
 
     return ColumnResource::collection($columns);
   }
 
-  public function store(Request $request, $boardId)
+  public function store(Request $request, Board $board)
   {
+    $this->authorize("create", [Column::class, $board]);
+
     $validated = $request->validate([
       "title" => ["required", "string", "max:100"],
       "description" => ["required", "string", "max:255"]
     ]);
 
-    $column = $request->user()->boards()->findOrFail($boardId)->columns()->create([
+    $column = $board->columns()->create([
       "title" => $validated["title"],
       "description" => $validated["description"]
     ]);
@@ -34,16 +42,16 @@ class ColumnController extends Controller
     ], 201);
   }
 
-  public function show(Request $request, $boardId, $columnId)
+  public function show(Request $request, Column $column)
   {
-    $column = $request->user()->boards()->findOrFail($boardId)->columns()->withConditionals($request)->findOrFail($columnId);
+    $this->authorize("view", $column);
 
     return new ColumnResource($column);
   }
 
-  public function update(Request $request, $boardId, $columnId)
+  public function update(Request $request, Column $column)
   {
-    $column = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId);
+    $this->authorize("update", $column);
 
     $validated = $request->validate([
       "title" => ["required", "string", "max:100"],
@@ -58,9 +66,9 @@ class ColumnController extends Controller
     return new ColumnResource($column);
   }
 
-  public function destroy(Request $request, $boardId, $columnId)
+  public function destroy(Request $request, Column $column)
   {
-    $column = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId);
+    $this->authorize("delete", $column);
 
     $column->delete();
 
@@ -70,13 +78,13 @@ class ColumnController extends Controller
     ], 204);
   }
 
-  public function move(Request $request, $boardId, $columnId)
+  public function move(Request $request, Column $column)
   {
+    $this->authorize("update", $column);
+
     $request->validate([
       'position' => ['required', 'numeric']
     ]);
-
-    $column = $request->user()->boards()->findOrFail($boardId)->columns()->findOrFail($columnId);
 
     $column->update([
       'position' => round(request('position'), 5)

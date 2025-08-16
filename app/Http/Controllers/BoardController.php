@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\BoardResource;
+use App\Models\Board;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
 class BoardController extends Controller
 {
+  use AuthorizesRequests;
+
   public function index(Request $request)
   {
     $boards = $request->user()->boards()->latest()->withConditionals($request)->get();
@@ -33,16 +37,16 @@ class BoardController extends Controller
     ], 201);
   }
 
-  public function show(Request $request, $id)
+  public function show(Request $request, Board $board)
   {
-    $board = $request->user()->boards()->withConditionals($request)->findOrFail($id);
+    $this->authorize("view", $board);
 
     return new BoardResource($board);
   }
 
-  public function update(Request $request, $id)
+  public function update(Request $request, Board $board)
   {
-    $board = $request->user()->boards()->findOrFail($id);
+    $this->authorize("update", $board);
 
     $validated = $request->validate([
       "title" => ["required", "string", "max:100"],
@@ -57,9 +61,9 @@ class BoardController extends Controller
     return new BoardResource($board);
   }
 
-  public function destroy(Request $request, $id)
+  public function destroy(Request $request, Board $board)
   {
-    $board = $request->user()->boards()->findOrFail($id);
+    $this->authorize("delete", $board);
 
     $board->delete();
 
