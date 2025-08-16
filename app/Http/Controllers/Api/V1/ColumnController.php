@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Resources\ColumnResource;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\V1\ColumnResource as ColumnResourceV1;
 use App\Models\Board;
 use App\Models\Column;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -18,7 +19,7 @@ class ColumnController extends Controller
 
     $columns = $board->columns()->withConditionals($request)->get();
 
-    return ColumnResource::collection($columns);
+    return ColumnResourceV1::collection($columns);
   }
 
   public function store(Request $request, Board $board)
@@ -38,7 +39,7 @@ class ColumnController extends Controller
     return response()->json([
       "status" => "success",
       "message" => "Column created successfully!",
-      "data" => new ColumnResource($column->load(["board", "tasks", "tasks.column"]))
+      "data" => new ColumnResourceV1($column->load(["board", "tasks", "tasks.column"]))
     ], 201);
   }
 
@@ -46,7 +47,7 @@ class ColumnController extends Controller
   {
     $this->authorize("view", $column);
 
-    return new ColumnResource($column);
+    return new ColumnResourceV1($column);
   }
 
   public function update(Request $request, Column $column)
@@ -63,7 +64,7 @@ class ColumnController extends Controller
       "description" => $validated["description"]
     ]);
 
-    return new ColumnResource($column);
+    return new ColumnResourceV1($column);
   }
 
   public function destroy(Request $request, Column $column)
@@ -90,6 +91,6 @@ class ColumnController extends Controller
       'position' => round(request('position'), 5)
     ]);
 
-    return new ColumnResource($column);
+    return new ColumnResourceV1($column);
   }
 }

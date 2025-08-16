@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Resources\TaskResource;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\V1\TaskResource as TaskResourceV1;
 use App\Models\Column;
 use App\Models\Task;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -18,7 +19,7 @@ class TaskController extends Controller
 
     $tasks = $column->tasks()->withConditionals($request)->get();
 
-    return TaskResource::collection($tasks);
+    return TaskResourceV1::collection($tasks);
   }
 
   public function store(Request $request, Column $column)
@@ -36,7 +37,7 @@ class TaskController extends Controller
     return response()->json([
       "status" => "success",
       "message" => "Task created successfully!",
-      "data" => new TaskResource($task->load("column"))
+      "data" => new TaskResourceV1($task->load("column"))
     ], 201);
   }
 
@@ -44,7 +45,7 @@ class TaskController extends Controller
   {
     $this->authorize("view", $task);
 
-    return new TaskResource($task);
+    return new TaskResourceV1($task);
   }
 
   public function update(Request $request, Task $task)
@@ -59,7 +60,7 @@ class TaskController extends Controller
       "description" => $validated["description"]
     ]);
 
-    return new TaskResource($task);
+    return new TaskResourceV1($task);
   }
 
   public function destroy(Request $request, Task $task)
@@ -89,6 +90,6 @@ class TaskController extends Controller
       'position' => round(request('position'), 5)
     ]);
 
-    return new TaskResource($task->load("column"));
+    return new TaskResourceV1($task->load("column"));
   }
 }

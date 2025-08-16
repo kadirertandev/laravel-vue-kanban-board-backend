@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Resources\BoardResource;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\V1\BoardResource as BoardResourceV1;
 use App\Models\Board;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ class BoardController extends Controller
   {
     $boards = $request->user()->boards()->latest()->withConditionals($request)->get();
 
-    return BoardResource::collection($boards);
+    return BoardResourceV1::collection($boards);
   }
 
   public function store(Request $request)
@@ -33,7 +34,7 @@ class BoardController extends Controller
     return response()->json([
       "status" => "success",
       "message" => "Board created successfully!",
-      "data" => new BoardResource($board)
+      "data" => new BoardResourceV1($board)
     ], 201);
   }
 
@@ -41,7 +42,7 @@ class BoardController extends Controller
   {
     $this->authorize("view", $board);
 
-    return new BoardResource($board);
+    return new BoardResourceV1($board);
   }
 
   public function update(Request $request, Board $board)
@@ -58,7 +59,7 @@ class BoardController extends Controller
       "description" => $validated["description"]
     ]);
 
-    return new BoardResource($board);
+    return new BoardResourceV1($board);
   }
 
   public function destroy(Request $request, Board $board)
