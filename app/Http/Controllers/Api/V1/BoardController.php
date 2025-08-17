@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\Board\StoreBoardRequest;
+use App\Http\Requests\Api\V1\Board\UpdateBoardRequest;
 use App\Http\Resources\V1\BoardResource as BoardResourceV1;
 use App\Models\Board;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -19,17 +21,11 @@ class BoardController extends Controller
     return BoardResourceV1::collection($boards);
   }
 
-  public function store(Request $request)
+  public function store(StoreBoardRequest $storeBoardRequest)
   {
-    $validated = $request->validate([
-      "title" => ["required", "string", "max:100"],
-      "description" => ["required", "string", "max:255"]
-    ]);
+    $validated = $storeBoardRequest->validated();
 
-    $board = $request->user()->boards()->create([
-      "title" => $validated["title"],
-      "description" => $validated["description"]
-    ]);
+    $board = $storeBoardRequest->user()->boards()->create($validated);
 
     return response()->json([
       "status" => "success",
@@ -45,19 +41,13 @@ class BoardController extends Controller
     return new BoardResourceV1($board);
   }
 
-  public function update(Request $request, Board $board)
+  public function update(UpdateBoardRequest $updateBoardRequest, Board $board)
   {
     $this->authorize("update", $board);
 
-    $validated = $request->validate([
-      "title" => ["required", "string", "max:100"],
-      "description" => ["required", "string", "max:255"]
-    ]);
+    $validated = $updateBoardRequest->validated();
 
-    $board->update([
-      "title" => $validated["title"],
-      "description" => $validated["description"]
-    ]);
+    $board->update($validated);
 
     return new BoardResourceV1($board);
   }

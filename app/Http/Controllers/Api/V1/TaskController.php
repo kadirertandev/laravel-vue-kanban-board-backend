@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\Task\MoveTaskRequest;
+use App\Http\Requests\Api\V1\Task\StoreTaskRequest;
+use App\Http\Requests\Api\V1\Task\UpdateTaskRequest;
 use App\Http\Resources\V1\TaskResource as TaskResourceV1;
 use App\Models\Column;
 use App\Models\Task;
@@ -22,17 +25,13 @@ class TaskController extends Controller
     return TaskResourceV1::collection($tasks);
   }
 
-  public function store(Request $request, Column $column)
+  public function store(StoreTaskRequest $storeTaskRequest, Column $column)
   {
     $this->authorize("create", [Task::class, $column]);
 
-    $validated = $request->validate([
-      "description" => ["required", "string", "max:255"],
-    ]);
+    $validated = $storeTaskRequest->validated();
 
-    $task = $column->tasks()->create([
-      "description" => $validated["description"]
-    ]);
+    $task = $column->tasks()->create($validated);
 
     return response()->json([
       "status" => "success",
@@ -48,17 +47,13 @@ class TaskController extends Controller
     return new TaskResourceV1($task);
   }
 
-  public function update(Request $request, Task $task)
+  public function update(UpdateTaskRequest $updateTaskRequest, Task $task)
   {
     $this->authorize("update", $task);
 
-    $validated = $request->validate([
-      "description" => ["required", "string", "max:255"]
-    ]);
+    $validated = $updateTaskRequest->validated();
 
-    $task->update([
-      "description" => $validated["description"]
-    ]);
+    $task->update($validated);
 
     return new TaskResourceV1($task);
   }
@@ -75,20 +70,13 @@ class TaskController extends Controller
     ], 204);
   }
 
-  public function move(Request $request, Task $task)
+  public function move(MoveTaskRequest $moveTaskRequest, Task $task)
   {
     $this->authorize("update", $task);
 
-    $request->validate([
-      'fromColumn' => ['required', 'exists:columns,id'],
-      'toColumn' => ['required', 'exists:columns,id'],
-      'position' => ['required', 'numeric'],
-    ]);
+    $validated = $moveTaskRequest->validated();
 
-    $task->update([
-      'column_id' => request("toColumn"),
-      'position' => round(request('position'), 5)
-    ]);
+    $task->update($validated);
 
     return new TaskResourceV1($task->load("column"));
   }

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\Column\MoveColumnRequest;
+use App\Http\Requests\Api\V1\Column\StoreColumnRequest;
+use App\Http\Requests\Api\V1\Column\UpdateColumnRequest;
 use App\Http\Resources\V1\ColumnResource as ColumnResourceV1;
 use App\Models\Board;
 use App\Models\Column;
@@ -22,19 +25,13 @@ class ColumnController extends Controller
     return ColumnResourceV1::collection($columns);
   }
 
-  public function store(Request $request, Board $board)
+  public function store(StoreColumnRequest $storeColumnRequest, Board $board)
   {
     $this->authorize("create", [Column::class, $board]);
 
-    $validated = $request->validate([
-      "title" => ["required", "string", "max:100"],
-      "description" => ["required", "string", "max:255"]
-    ]);
+    $validated = $storeColumnRequest->validated();
 
-    $column = $board->columns()->create([
-      "title" => $validated["title"],
-      "description" => $validated["description"]
-    ]);
+    $column = $board->columns()->create($validated);
 
     return response()->json([
       "status" => "success",
@@ -50,19 +47,13 @@ class ColumnController extends Controller
     return new ColumnResourceV1($column);
   }
 
-  public function update(Request $request, Column $column)
+  public function update(UpdateColumnRequest $updateColumnRequest, Column $column)
   {
     $this->authorize("update", $column);
 
-    $validated = $request->validate([
-      "title" => ["required", "string", "max:100"],
-      "description" => ["required", "string", "max:255"]
-    ]);
+    $validated = $updateColumnRequest->validated();
 
-    $column->update([
-      "title" => $validated["title"],
-      "description" => $validated["description"]
-    ]);
+    $column->update($validated);
 
     return new ColumnResourceV1($column);
   }
@@ -79,17 +70,13 @@ class ColumnController extends Controller
     ], 204);
   }
 
-  public function move(Request $request, Column $column)
+  public function move(MoveColumnRequest $moveColumnRequest, Column $column)
   {
     $this->authorize("update", $column);
 
-    $request->validate([
-      'position' => ['required', 'numeric']
-    ]);
+    $validated = $moveColumnRequest->validated();
 
-    $column->update([
-      'position' => round(request('position'), 5)
-    ]);
+    $column->update($validated);
 
     return new ColumnResourceV1($column);
   }
