@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -12,8 +14,8 @@
 */
 
 pest()->extend(Tests\TestCase::class)
-    ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
-    ->in('Feature');
+  ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+  ->in('Feature', 'Unit');
 
 /*
 |--------------------------------------------------------------------------
@@ -27,7 +29,7 @@ pest()->extend(Tests\TestCase::class)
 */
 
 expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
+  return $this->toBe(1);
 });
 
 /*
@@ -41,7 +43,44 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function createUser()
 {
-    // ..
+  return User::factory()->create();
 }
+
+function createBoardForUser(User $user, int $amount = 1)
+{
+  if ($amount < 1)
+    throw new Exception("Amount must be bigger than or equal to 1");
+
+  if ($amount === 1)
+    return $user->boards()->create(dummyBoardData($amount));
+
+  return collect(dummyBoardData($amount))->map(function ($data) use ($user) {
+    return $user->boards()->create($data);
+  });
+}
+
+function dummyBoardData(int $amount)
+{
+  $data = [];
+
+  if ($amount < 1)
+    throw new Exception("Amount must be bigger than or equal to 1");
+
+  $title = "Board ";
+  $descriptionB = "Board ";
+  $descriptionE = " Description";
+
+
+  for ($i = 1; $i <= $amount; $i++) {
+    $data[] = [
+      "title" => $title . $i,
+      "description" => $descriptionB . $i . $descriptionE
+    ];
+  }
+
+  return $amount === 1 ? $data[0] : $data;
+}
+
+
