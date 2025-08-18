@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Board;
+use App\Models\Column;
 use App\Models\User;
 
 /*
@@ -76,6 +78,72 @@ function dummyBoardData(int $amount)
   for ($i = 1; $i <= $amount; $i++) {
     $data[] = [
       "title" => $title . $i,
+      "description" => $descriptionB . $i . $descriptionE
+    ];
+  }
+
+  return $amount === 1 ? $data[0] : $data;
+}
+
+function createColumnForBoard(Board $board, int $amount = 1)
+{
+  if ($amount < 1)
+    throw new Exception("Amount must be bigger than or equal to 1");
+
+  if ($amount === 1)
+    return $board->columns()->create(dummyColumnData($amount));
+
+  return collect(dummyColumnData($amount))->map(function ($data) use ($board) {
+    return $board->columns()->create($data);
+  });
+}
+
+function dummyColumnData(int $amount)
+{
+  $data = [];
+
+  if ($amount < 1)
+    throw new Exception("Amount must be bigger than or equal to 1");
+
+  $title = "Column ";
+  $descriptionB = "Column ";
+  $descriptionE = " Description";
+
+  for ($i = 1; $i <= $amount; $i++) {
+    $data[] = [
+      "title" => $title . $i,
+      "description" => $descriptionB . $i . $descriptionE
+    ];
+  }
+
+  return $amount === 1 ? $data[0] : $data;
+}
+
+function createTaskForColumn(Column $column, int $amount = 1)
+{
+  if ($amount < 1)
+    throw new Exception("Amount must be bigger than or equal to 1");
+
+  if ($amount === 1)
+    return $column->tasks()->create(dummyTaskData($amount));
+
+  return collect(dummyTaskData($amount))->map(function ($data) use ($column) {
+    return $column->tasks()->create($data);
+  });
+}
+
+function dummyTaskData(int $amount)
+{
+  $data = [];
+
+  if ($amount < 1)
+    throw new Exception("Amount must be bigger than or equal to 1");
+
+  $descriptionB = "Task ";
+  $descriptionE = " Description";
+
+  for ($i = 1; $i <= $amount; $i++) {
+    $data[] = [
       "description" => $descriptionB . $i . $descriptionE
     ];
   }

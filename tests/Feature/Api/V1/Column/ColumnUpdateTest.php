@@ -4,42 +4,43 @@ beforeEach(function () {
   $this->user = createUser();
   $this->user2 = createUser();
   $this->board = createBoardForUser($this->user);
+  $this->column = createColumnForBoard($this->board);
 
   $this->apiPrefix = "/api/v1";
-  $this->endPoint = "{$this->apiPrefix}/boards/{$this->board->id}";
+  $this->endPoint = "{$this->apiPrefix}/columns/{$this->column->id}";
 });
 
-it('denies unauthenticated users to update any board', function () {
-  $response = $this->putJson($this->endPoint, dummyBoardData(1));
+it('denies unauthenticated users to update any column', function () {
+  $response = $this->putJson($this->endPoint, dummyColumnData(1));
 
   $response->assertStatus(401);
 });
 
-it('denies users to update boards they do not own', function () {
+it('denies users to update columns they do not own', function () {
   $response = $this->actingAs($this->user2)->putJson($this->endPoint, dummyBoardData(1));
 
   $response->assertStatus(403);
 });
 
-it('allows users to update boards they do own', function () {
+it('allows users to update columns they do own', function () {
   $updateData = [
-    "title" => "Board 1 is now updated",
-    "description" => "Board 1 is now updated (description)",
+    "title" => "Column 1 is now updated",
+    "description" => "Column 1 is now updated (description)",
   ];
 
   $response = $this->actingAs($this->user)->putJson($this->endPoint, $updateData);
 
   $response->assertStatus(200)
     ->assertJsonFragment([
-      "id" => $this->board->id,
+      "id" => $this->column->id,
       "title" => $updateData["title"],
       "description" => $updateData["description"],
-      "createdAtFrontend" => $this->board->created_at->diffForHumans(),
-      "createdAt" => $this->board->created_at
+      "position" => $this->column->position,
+      "createdAt" => $this->column->created_at->diffForHumans()
     ]);
 
-  $this->assertDatabaseHas("boards", [
-    "user_id" => $this->user->id,
+  $this->assertDatabaseHas("columns", [
+    "board_id" => $this->board->id,
     ...$updateData
   ]);
 });
@@ -53,8 +54,11 @@ it('returns expected json structure on success', function () {
         "id",
         "title",
         "description",
-        "createdAtFrontend",
+        "position",
         "createdAt",
+        "relations" => [
+          "board_id"
+        ]
       ]
     ]);
 });
@@ -75,4 +79,3 @@ it('returns error when fields are invalid', function () {
       ]
     ]);
 });
-

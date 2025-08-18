@@ -78,6 +78,8 @@ class ColumnController extends Controller
 
     $column->update($validated);
 
+    $column->refresh(); //refresh in case positions have been reset
+
     return new ColumnResourceV1($column);
   }
 }

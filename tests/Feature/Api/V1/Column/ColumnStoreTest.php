@@ -4,30 +4,31 @@ use Illuminate\Testing\Fluent\AssertableJson;
 
 beforeEach(function () {
   $this->user = createUser();
+  $this->board = createBoardForUser($this->user);
   $this->apiPrefix = "/api/v1";
-  $this->endPoint = "{$this->apiPrefix}/boards";
+  $this->endPoint = "{$this->apiPrefix}/boards/{$this->board->id}/columns";
 });
 
-test('unauthenticated user cannot create board', function () {
-  $response = $this->postJson($this->endPoint, dummyBoardData(1));
+it('does not allow unauthenticated users to create a column', function () {
+  $response = $this->postJson($this->endPoint, dummyColumnData(1));
 
   $response->assertStatus(401);
 });
 
-test('authenticated user can create board', function () {
-  $data = dummyBoardData(1);
+it('allows authenticated users to create a column', function () {
+  $data = dummyColumnData(1);
 
   $response = $this->actingAs($this->user)->postJson($this->endPoint, $data);
 
   $response->assertStatus(201);
-  $this->assertDatabaseHas("boards", [
-    "user_id" => $this->user->id,
+  $this->assertDatabaseHas("columns", [
+    "board_id" => $this->board->id,
     ...$data
   ]);
 });
 
 it('returns expected json structure on success', function () {
-  $data = dummyBoardData(1);
+  $data = dummyColumnData(1);
 
   $response = $this->actingAs($this->user)->postJson($this->endPoint, $data);
 
@@ -39,8 +40,22 @@ it('returns expected json structure on success', function () {
         "id",
         "title",
         "description",
-        "createdAtFrontend",
+        "position",
         "createdAt",
+        "tasks" => [
+          "*" => [
+            "id",
+            "description",
+            "position",
+            "createdAt",
+            "relations" => [
+              "column_id"
+            ],
+          ]
+        ],
+        "relations" => [
+          "board_id"
+        ]
       ]
     ]);
 });

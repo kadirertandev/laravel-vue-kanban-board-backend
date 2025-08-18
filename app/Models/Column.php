@@ -29,18 +29,32 @@ class Column extends Model
 
     static::saved(function ($model) {
       if ($model->position < self::POSITION_MIN) {
-        DB::statement("SET @previousPosition := 0");
-        DB::statement("
+
+        if (DB::getDriverName() === 'sqlite') {
+          $columns = Column::where('board_id', $model->board_id)
+            ->orderBy('position')
+            ->get();
+
+          $position = 0;
+          foreach ($columns as $col) {
+            $position += self::POSITION_GAP;
+            $col->updateQuietly(['position' => $position]);
+          }
+        } else {
+          DB::statement("SET @previousPosition := 0");
+          DB::statement("
               UPDATE columns
               SET position = (@previousPosition := @previousPosition + ?)
               WHERE board_id = ?
               ORDER BY position
           ",
-          [
-            self::POSITION_GAP,
-            $model->board_id
-          ]
-        );
+            [
+              self::POSITION_GAP,
+              $model->board_id
+            ]
+          );
+        }
+
       }
     });
   }

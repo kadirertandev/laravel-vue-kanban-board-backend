@@ -28,8 +28,10 @@ class MoveColumnRequest extends FormRequest
 
   protected function prepareForValidation(): void
   {
-    $this->merge([
-      'position' => round($this->position, 5)
-    ]);
+    if ($this->has('position')) {
+      $this->merge([
+        'position' => round($this->position, 5),
+      ]);
+    }
   }
 }
