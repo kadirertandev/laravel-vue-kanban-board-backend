@@ -78,6 +78,8 @@ class TaskController extends Controller
 
     $task->update($validated);
 
+    $task->refresh();
+
     return new TaskResourceV1($task->load("column"));
   }
 }

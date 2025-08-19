@@ -48,7 +48,7 @@ it('returns the columns belongs to authenticated user', function () {
     ->assertJsonCount(3, "data");
 });
 
-it('returns expected json structure for single board', function () {
+it('returns expected json structure for single column', function () {
   $column = createColumnForBoard($this->board, 1);
 
   $response = $this->actingAs($this->user)->getJson($this->endPoint);
@@ -83,7 +83,7 @@ it('returns expected json structure for single board', function () {
     ]);
 });
 
-it('returns expected json structure for multiple boards', function () {
+it('returns expected json structure for multiple columns', function () {
   $columns = createColumnForBoard($this->board, 3);
 
   $response = $this->actingAs($this->user)->getJson($this->endPoint);

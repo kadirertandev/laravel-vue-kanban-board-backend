@@ -59,12 +59,9 @@ it('returns expected json structure on success', function () {
         "title",
         "description",
         "position",
-        "createdAt",
-        "relations" => [
-          "board_id"
-        ]
+        "createdAt"
       ]
-    ]);
+    ])->assertJsonMissingPath("data.relations");
 });
 
 it('returns error when fields are invalid', function () {
@@ -118,10 +115,7 @@ it('repositions columns when position of a column goes below minimum', function 
       "title" => $columns[1]->title,
       "description" => $columns[1]->description,
       "position" => 60000,
-      "createdAt" => $columns[1]->created_at->diffForHumans(),
-      "relations" => [
-        "board_id" => $this->board->id
-      ]
+      "createdAt" => $columns[1]->created_at->diffForHumans()
     ]);
 
   $this->assertDatabaseHas("columns", [

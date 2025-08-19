@@ -23,16 +23,30 @@ class MoveTaskRequest extends FormRequest
   {
     return [
       'fromColumn' => ['required', 'exists:columns,id'],
-      'toColumn' => ['required', 'exists:columns,id'],
+      'toColumn' => [
+        'required',
+        'exists:columns,id',
+        function ($attribute, $value, $fail) {
+          #check if toColumn belongs to user
+          $ownsColumn = \App\Models\Column::where("id", $value)
+            ->whereHas("board", fn($q) => $q->where("user_id", $this->user()->id))
+            ->exists();
+
+          if (!$ownsColumn)
+            abort(403, "This action is unauthorized");
+        }
+      ],
       'position' => ['required', 'numeric'],
     ];
   }
 
   protected function prepareForValidation(): void
   {
-    $this->merge([
-      'position' => round($this->position, 5)
-    ]);
+    if ($this->has("position")) {
+      $this->merge([
+        'position' => round($this->position, 5)
+      ]);
+    }
   }
 
   public function validated($key = null, $default = null)

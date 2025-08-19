@@ -4,26 +4,40 @@ use Illuminate\Testing\Fluent\AssertableJson;
 
 beforeEach(function () {
   $this->user = createUser();
+  $this->user2 = createUser();
   $this->board = createBoardForUser($this->user);
+  $this->column = createColumnForBoard(board: $this->board);
 
   $this->apiPrefix = "/api/v1";
-  $this->endPoint = "{$this->apiPrefix}/boards/{$this->board->id}/columns";
+  $this->endPoint = "{$this->apiPrefix}/columns/{$this->column->id}/tasks";
 });
 
-it('does not allow unauthenticated users to create a column', function () {
-  $response = $this->postJson($this->endPoint, dummyColumnData(1));
+it('does not allow unauthenticated users to create a task', function () {
+  $response = $this->postJson($this->endPoint, dummyTaskData(1));
 
   $response->assertStatus(401);
 });
 
-it('allows authenticated users to create a column', function () {
-  $data = dummyColumnData(1);
+it('allows authenticated users to create a task', function () {
+  $data = dummyTaskData(1);
 
   $response = $this->actingAs($this->user)->postJson($this->endPoint, $data);
 
-  $response->assertStatus(201);
-  $this->assertDatabaseHas("columns", [
-    "board_id" => $this->board->id,
+  $response->assertStatus(201)
+    ->assertJsonFragment([
+      "status" => "success",
+      "message" => "Task created successfully!"
+    ])
+    ->assertJsonFragment([
+      "description" => $data["description"],
+      "position" => 60000,
+      "createdAt" => "0 seconds ago",
+      "relations" => [
+        "column_id" => $this->column->id
+      ]
+    ]);
+  $this->assertDatabaseHas("tasks", [
+    "column_id" => $this->column->id,
     ...$data
   ]);
 });
@@ -39,23 +53,11 @@ it('returns expected json structure on success', function () {
       "message",
       "data" => [
         "id",
-        "title",
         "description",
         "position",
         "createdAt",
-        "tasks" => [
-          "*" => [
-            "id",
-            "description",
-            "position",
-            "createdAt",
-            "relations" => [
-              "column_id"
-            ],
-          ]
-        ],
         "relations" => [
-          "board_id"
+          "column_id"
         ]
       ]
     ]);
@@ -63,7 +65,6 @@ it('returns expected json structure on success', function () {
 
 it('returns error when fields are invalid', function () {
   $data = [
-    "title" => "",
     "description" => ""
   ];
 
@@ -71,13 +72,10 @@ it('returns error when fields are invalid', function () {
 
   $response->assertStatus(422)
     ->assertInvalid([
-      "title" => "The title field is required.",
       "description" => "The description field is required."
     ])
     ->assertJson(function (AssertableJson $json) {
-      return $json->where("message", "The title field is required. (and 1 more error)")
-        ->has("errors.title")
-        ->where("errors.title.0", "The title field is required.")
+      return $json->where("message", "The description field is required.")
         ->has("errors.description")
         ->where("errors.description.0", "The description field is required.")
         ->etc();

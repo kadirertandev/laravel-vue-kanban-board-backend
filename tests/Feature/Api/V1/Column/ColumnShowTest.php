@@ -26,12 +26,14 @@ it('allows access to the columns show endpoint when user does own the column', f
   $response = $this->actingAs($this->user)->getJson($this->endPoint);
 
   $response->assertStatus(200)
-    ->assertJsonFragment([
-      "id" => $this->column->id,
-      "title" => $this->column->title,
-      "description" => $this->column->description,
-      "position" => $this->column->position,
-      "createdAt" => $this->column->created_at->diffForHumans()
+    ->assertExactJson([
+      "data" => [
+        "id" => $this->column->id,
+        "title" => $this->column->title,
+        "description" => $this->column->description,
+        "position" => $this->column->position,
+        "createdAt" => $this->column->created_at->diffForHumans()
+      ]
     ]);
 });
 
@@ -47,5 +49,5 @@ it('returns expected json structure for the column', function () {
         "position",
         "createdAt"
       ]
-    ]);
+    ])->assertJsonMissingPath("data.relations");
 });

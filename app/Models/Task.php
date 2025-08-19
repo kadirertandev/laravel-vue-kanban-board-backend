@@ -28,18 +28,32 @@ class Task extends Model
 
     static::saved(function ($model) {
       if ($model->position < self::POSITION_MIN) {
-        DB::statement("SET @previousPosition := 0");
-        DB::statement("
+
+        if (DB::getDriverName() === 'sqlite') {
+          $tasks = Task::where('column_id', $model->column_id)
+            ->orderBy('position')
+            ->get();
+
+          $position = 0;
+          foreach ($tasks as $task) {
+            $position += self::POSITION_GAP;
+            $task->updateQuietly(['position' => $position]);
+          }
+        } else {
+          DB::statement("SET @previousPosition := 0");
+          DB::statement("
               UPDATE tasks
               SET position = (@previousPosition := @previousPosition + ?)
               WHERE column_id = ?
               ORDER BY position
           ",
-          [
-            self::POSITION_GAP,
-            $model->column_id
-          ]
-        );
+            [
+              self::POSITION_GAP,
+              $model->column_id
+            ]
+          );
+        }
+
       }
     });
   }

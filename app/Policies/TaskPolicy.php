@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Http\Requests\Api\V1\Task\MoveTaskRequest;
 use App\Models\Column;
 use App\Models\Task;
 use App\Models\User;
@@ -22,7 +23,7 @@ class TaskPolicy
    */
   public function view(User $user, Task $task): bool
   {
-    return $user->is($task->column->board->user);
+    return $user->is($task->column()->first()->board->user);
   }
 
   /**
@@ -38,7 +39,7 @@ class TaskPolicy
    */
   public function update(User $user, Task $task): bool
   {
-    return $user->is($task->column->board->user);
+    return $user->is($task->column()->first()->board->user);
   }
 
   /**
@@ -46,7 +47,7 @@ class TaskPolicy
    */
   public function delete(User $user, Task $task): bool
   {
-    return $user->is($task->column->board->user);
+    return $user->is($task->column()->first()->board->user);
   }
 
   /**

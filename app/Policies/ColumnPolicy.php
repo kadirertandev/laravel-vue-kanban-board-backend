@@ -22,7 +22,7 @@ class ColumnPolicy
    */
   public function view(User $user, Column $column): bool
   {
-    return $user->is($column->board->user);
+    return $user->is($column->board()->first()->user);
   }
 
   /**
@@ -38,7 +38,7 @@ class ColumnPolicy
    */
   public function update(User $user, Column $column): bool
   {
-    return $user->is($column->board->user);
+    return $user->is($column->board()->first()->user);
   }
 
   /**
@@ -46,7 +46,7 @@ class ColumnPolicy
    */
   public function delete(User $user, Column $column): bool
   {
-    return $user->is($column->board->user);
+    return $user->is($column->board()->first()->user);
   }
 
   /**
